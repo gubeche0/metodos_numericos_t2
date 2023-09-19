@@ -13,9 +13,21 @@ def resolve_matriz(matriz, variaveis):
         results.append(resolve_linha(linha, variaveis))
     return results
 
+def calcula_erro(matriz, results, variaveis):
+    results = resolve_matriz(matriz, variaveis)
+    erro = 0
+    for i in range(len(results)):
+        erro += abs(results[i] - variaveis[i])
+    return results
+
 def gauss_seidel(matriz, results, precisao):
     x = 0
     chute = [0 for x in range(len(matriz))]
+
+    # for n in chute:
+    #     print(f"{n:.5f}", end=" ")
+    # print("]")
+
     while x < 100:
         x += 1
         # new_results = []
@@ -36,22 +48,15 @@ def gauss_seidel(matriz, results, precisao):
 
         # print(f"iteração {x}: [", end=" ")
         # for n in chute:
-        #     print(f"{n:.3f}", end=" ")
+        #     print(f"{n:.5f}", end=" ")
         # print("]")
     
-    print(f"\n\nResultado =  [", end=" ")
-    for n in chute:
-        print(f"{n:.3f}", end=" ")
-    print("]")
-
-    print("\n")
-    a = resolve_matriz(matriz, chute)
-    for x in a:
-        print(f"resultado: {x:.3f}", end=" ")
+    return chute
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("file", type=Path)
+parser.add_argument("-p", "--precisao", type=float, default=0.0001)
 
 args = parser.parse_args()
 
@@ -96,17 +101,15 @@ with open(args.file, "r") as file:
 
 print("\n\n###########\n\n")
 
-
 matriz = []
 results = []
-for line in fofocas:
-    linha = []
-    # results.append(len(line)-1)
+for coluna in range(1, len(fofocas) + 1):
     results.append(-1)
 
-    for x in range(1, len(fofocas) + 1):
-        if x in line:
-            linha.append(line[x])
+    linha = []
+    for l in range(len(fofocas)):
+        if coluna in fofocas[l]:
+            linha.append(fofocas[l][coluna])
         else:
             linha.append(0)
 
@@ -118,4 +121,16 @@ for linha in range(len(matriz)):
     print(f" = {results[linha]}")
 
 
-gauss_seidel(matriz, results, 0.0001)
+res = gauss_seidel(matriz, results, args.precisao)
+
+# print(f"\n\nResultado =  [", end=" ")
+# for n in res:
+#     print(f"{n:.3f}", end=" ")
+# print("]")
+
+maior = 0
+for i in range(len(res)):
+    if res[i] > res[maior]:
+        maior = i
+
+print(f"\n\nA velha com mais fofoca é a {maior + 1} com {res[maior]:.4f} fofocas")
