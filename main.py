@@ -40,7 +40,7 @@ with open(args.file, "r") as file:
 
         for amiga in amigas:
             amiga = int(amiga)
-            array[amiga] = 1/quantidadeAmigas - (0.1 / quantidadeAmigas)
+            array[amiga] = 0.9/quantidadeAmigas
 
         fofocas.append(array)
 
