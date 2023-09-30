@@ -14,49 +14,51 @@ def resolve_matriz(matriz, variaveis):
     return results
 
 def calcula_erro(matriz, results, variaveis):
-    results = resolve_matriz(matriz, variaveis)
+    new_results = resolve_matriz(matriz, variaveis)
     erro = 0
     for i in range(len(results)):
-        erro += abs(results[i] - variaveis[i])
-    return results
+        erro += abs(results[i] - new_results[i])
+    return erro
 
-def gauss_seidel(matriz, results, precisao):
+def gauss_seidel(matriz, results, precisao, max_iteracao = 100):
     x = 0
     chute = [0 for x in range(len(matriz))]
 
-    # for n in chute:
-    #     print(f"{n:.5f}", end=" ")
-    # print("]")
-
-    while x < 100:
+    while x < max_iteracao:
         x += 1
-        # new_results = []
         for i in range(len(matriz)):
-            # matriz[i] = results[1]
-            # value = results[i] + sum([(-1 * matriz[i][j]) * results[j] for j in range(len(matriz)) if j != i])
+
+            # value = results[i] + sum([ -matriz[i][j] * chute[j] for j in range(len(matriz)) if j != i])
             value = results[i]
-            
             for j in range(len(matriz)):
                 if j != i:
                     value += -matriz[i][j] * chute[j]
-                
-            # value /= matriz[i][i]
-            value = value / matriz[i][i]
-            # new_results.append(value)
-            chute[i] = value
 
+            value /= matriz[i][i]
+            chute[i] = value
 
         # print(f"iteração {x}: [", end=" ")
         # for n in chute:
         #     print(f"{n:.5f}", end=" ")
-        # print("]")
+        # print("] erro:", max(chute))
+
+        if precisao <= 0:
+            continue
+
+        erro = calcula_erro(matriz, results, chute)
+        # print(max(chute), erro, erro < precisao)
+
+        if erro < precisao:
+            print(f"Convergiu em {x} iterações")
+            break
     
     return chute
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("file", type=Path)
-parser.add_argument("-p", "--precisao", type=float, default=0.0001)
+parser.add_argument("-p", "--precisao", type=float, default=0.000001)
+parser.add_argument("-m", "--max-iteration", type=int, default=100, help="Número máximo de iterações, -1 para desativar")
 
 args = parser.parse_args()
 
@@ -80,12 +82,7 @@ with open(args.file, "r") as file:
 
         velha = int(parts[0].strip())
         amigas = parts[1].strip().split()
-        # print(velha, amigas, len(amigas), (1/len(amigas)), (1/len(amigas) - (0.1 / len(amigas))))
-        # print(velha, end=": ")
 
-        # for amiga in amigas:
-        #     print(amiga, end=" ")
-        # print()
         print(f"{velha}: {amigas}")
         
         array = {}
@@ -115,13 +112,14 @@ for coluna in range(1, len(fofocas) + 1):
 
     matriz.append(linha)
 
+# Imprime a matriz
 for linha in range(len(matriz)):
     for elemento in matriz[linha]:
         print(f"{elemento:5.2f}", end=" ")
     print(f" = {results[linha]}")
 
 
-res = gauss_seidel(matriz, results, args.precisao)
+res = gauss_seidel(matriz, results, args.precisao, args.max_iteration)
 
 # print(f"\n\nResultado =  [", end=" ")
 # for n in res:
